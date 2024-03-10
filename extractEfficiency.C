@@ -35,7 +35,7 @@ void extractEfficiency(const char *fileNameEfficiency = "AnalysisResults.root", 
   Int_t nBins[] = {efficiency4D->GetAxis(0)->GetNbins(), efficiency4D->GetAxis(1)->GetNbins(), 1, efficiency4D->GetAxis(3)->GetNbins()};
   Double_t xMin[] = {efficiency4D->GetAxis(0)->GetXmin(), efficiency4D->GetAxis(1)->GetXmin(), 0, efficiency4D->GetAxis(3)->GetXmin()};
   Double_t xMax[] = {efficiency4D->GetAxis(0)->GetXmax(), efficiency4D->GetAxis(1)->GetXmax(), 101, efficiency4D->GetAxis(3)->GetXmax()};
-  efficiency4D_new = new THnF("generated_new", "", 4, nBins, xMin, xMax);
+  efficiency4D_new = new THnF("efficiency4D_new", "", 4, nBins, xMin, xMax);
   efficiency4D_new->SetBinEdges(1,assocPtArr);
 
   if (condenseMultiplicity) // condensing centrality
