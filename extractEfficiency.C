@@ -122,7 +122,7 @@ void extractEfficiency(const char *fileNameEfficiency = "AnalysisResults.root", 
   }
 
   file = TFile::Open(outputFile, "UPDATE");
-  efficiency4D->SetName("Efficiency");
+  efficiency4D->SetName("ccdb_object");
   efficiency4D->Write();
   file->Close();
 
