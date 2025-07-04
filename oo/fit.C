@@ -149,7 +149,8 @@ void fit(const char *pinFileName = "dphi_corr.root", const char *poutFileName = 
 
 	TH1 *pmult = pf->Get<TH1>("multiplicity");
 
-	auto v22NoMass = new TH3F("v22NoMass", ";pT,trig;pT,assoc;multiplicity,v22", int(Ntrig), ptrigPt, int(Nassoc), passocPt, int(Ncent), pcentBins);
+	auto v22NoMassTemplate = new TH3F("v22NoMassTemplate", ";pT,trig;pT,assoc;multiplicity,v22", int(Ntrig), ptrigPt, int(Nassoc), passocPt, int(Ncent), pcentBins);
+	auto v22NoMassLMSubtraction = (TH3*) v22NoMassTemplate->Clone("v22NoMassLMSubtraction");
 
 	TFile *pfout = new TFile(poutFileName,"recreate");
 	pfout->cd();
@@ -211,22 +212,29 @@ void fit(const char *pinFileName = "dphi_corr.root", const char *poutFileName = 
 						pjetYieldRaw = (TH1D*)pd->Clone(); //yield needed later for the non-flow subtraction
 					pd->Write();
 
-					float v2sb, v2sberr, scaling, scalingerr;
+					float v2template, v2templateerr;
+					float scaling, scalingerr;
+					float v2lmsub, v2lmsuberr;
 					
 					if (!lowestFit) {
 						auto fit = extract(phf1, namepf.Data());
-						v2sb = fit->GetParameter(3);
-						v2sberr = fit->GetParError(3);
+						v2template = v2lmsub = fit->GetParameter(3);
+						v2templateerr = v2lmsuberr = fit->GetParError(3);
 						scaling = scalingerr = 0;
 
 						lowestFit = fit;
 						lowestHist = ph;
 					} else {
 						auto fit = extractSubtraction(phf1, namepf.Data(), lowestFit);
-						v2sb = fit->GetParameter(3);
-						v2sberr = fit->GetParError(3);
+						v2template = fit->GetParameter(3);
+						v2templateerr = fit->GetParError(3);
 						scaling = fit->GetParameter(7);
 						scalingerr = fit->GetParError(7);
+
+						// convert to LM subtraction by rescaling
+						float factor = fit->GetParameter(1) / (fit->GetParameter(1) + scaling * fit->GetParameter(9));
+						v2lmsub = v2template * factor;
+						v2lmsuberr = v2templateerr * factor; // TODO uncertainty propagation of param 1 and 9
 
 						// draw a subtracted 2d histogram with the scale factor (looks horrible in pp, let's see in OO)
 						if (false) {
@@ -237,16 +245,21 @@ void fit(const char *pinFileName = "dphi_corr.root", const char *poutFileName = 
 							return;
 						}
 					}
-					printf("Fitting %d %d %d --> v22 = %.4f +- %.4f | scaling: %.2f +- %.2f\n", itrig, iassoc, ib, v2sb, v2sberr, scaling, scalingerr);
+					printf("Fitting %d %d %d --> v22(template) = %.4f +- %.4f | v22(LM subtraction) = %.4f +- %.4f | scaling: %.2f +- %.2f\n", itrig, iassoc, ib, v2template, v2templateerr, v2lmsub, v2lmsuberr, scaling, scalingerr);
 
 					if(imass >= 0){
 						gpsimMass->GetXaxis()->SetRangeUser(pmassBins[imass],pmassBins[imass+1]);
 						double meanMass = gpsimMass->GetMean();
-						pvsbMass->SetPoint(imass,meanMass,v2sb); //TODO: the point probably has to be set correctly according to the distribution of D0 (mean of the bins)
-						pvsbMass->SetPointError(imass,0.0f,v2sberr);
+						pvsbMass->SetPoint(imass,meanMass,v2template); //TODO: the point probably has to be set correctly according to the distribution of D0 (mean of the bins)
+						pvsbMass->SetPointError(imass,0.0f,v2templateerr);
 					} else {
-						v22NoMass->SetBinContent(itrig+1, iassoc+1, ib+1, v2sb);
-						v22NoMass->SetBinError(itrig+1, iassoc+1, ib+1, v2sberr);
+						// TODO here we still lack the extraction of the reference flow over the full pT range
+						
+						v22NoMassTemplate->SetBinContent(itrig+1, iassoc+1, ib+1, v2template);
+						v22NoMassTemplate->SetBinError(itrig+1, iassoc+1, ib+1, v2templateerr);
+
+						v22NoMassLMSubtraction->SetBinContent(itrig+1, iassoc+1, ib+1, v2lmsub);
+						v22NoMassLMSubtraction->SetBinError(itrig+1, iassoc+1, ib+1, v2lmsuberr);
 					}
 				}
 				pvsbMass->Write(Form("v2sb_%u_%u_%u",itrig,iassoc,ib));
@@ -381,7 +394,8 @@ void fit(const char *pinFileName = "dphi_corr.root", const char *poutFileName = 
 	// delete []pmeanCents;
 	// delete []passocPt;
 
-	v22NoMass->Write();
+	v22NoMassTemplate->Write();
+	v22NoMassLMSubtraction->Write();
 
 	pfout->Close();
 	delete pfout;
