@@ -52,13 +52,13 @@ void extract2D(const char *fileNamePbPb = "AnalysisResults.root", const char *ou
   // Store this information to have it in fitting macro
   TTree axes("axes", "Axes final binning");
   axes.Branch("NleadingPt", &maxLeadingPt, "NleadingPt/i");
-  axes.Branch("leadingPt", leadingPtArr, Form("leadingPt[%zu]/F", std::size(leadingPtArr)));
+  axes.Branch("leadingPt", leadingPtArr, Form("leadingPt[%d]/F", maxLeadingPt+1));
   axes.Branch("NassocPt", &maxLeadingPt, "NassocPt/i");
-  axes.Branch("assocPt", assocPtArr, Form("assocPt[%zu]/F", std::size(assocPtArr)));
+  axes.Branch("assocPt", assocPtArr, Form("assocPt[%d]/F", maxAssocPt+1));
   axes.Branch("Ncentrality", &maxCentrality, "Ncentrality/i");
-  axes.Branch("centrality", centralityArr, Form("centrality[%zu]/F", std::size(centralityArr)));
+  axes.Branch("centrality", centralityArr, Form("centrality[%d]/F", maxCentrality+1));
   axes.Branch("Nmass", &maxMass, "Nmass/i");
-  axes.Branch("mass", massArr, Form("mass[%zu]/F", std::size(massArr)));
+  axes.Branch("mass", massArr, Form("mass[%d]/F", maxMass+1));
 
   auto inputFile = TFile::Open(fileNamePbPb);
 

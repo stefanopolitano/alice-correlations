@@ -1,4 +1,3 @@
-
 static TH1D *gpsimMass;
 static TGraphErrors *gpvsb;
 
@@ -36,32 +35,72 @@ double SimFit(const double *par){
 	return chi2_1+chi2_2;
 }
 
-std::tuple<float, float> extract(TH1D *phf1, uint itrig, uint iassoc, uint ib, const char *pnamepf, bool write = true){
+TF1* extract(TH1D *phf1, const char *pnamepf, bool write = true){
 	const TString fitName = Form("fit%s",pnamepf);
-	TF1 fit(fitName,"[0]+[1]*(1+2*[2]*TMath::Cos(x)+2*[3]*TMath::Cos(2*x)+2*[4]*TMath::Cos(3*x)+2*[5]*TMath::Cos(4*x)+2*[6]*TMath::Cos(5*x))");
-	fit.SetParNames("czyam","c","v1","v2","v3","v4","v5");
-	/*if(!(flags & FLAG_FIT_V5)){
-		fit.FixParameter(5,0.0);
-		fit.FixParameter(6,0.0);
-	}*/
-	fit.FixParameter(5,0.0); // v4 := 0
-	fit.FixParameter(6,0.0); // v5 := 0
-	fit.FixParameter(0,0.0); // offset := 0
-	const char* option = "0QSE"; //"0QSE";
-	TFitResultPtr r = phf1->Fit(&fit,option,"",-TMath::Pi()/2.0,3.0/2.0*TMath::Pi());
-	printf("Fitting %d %d %d --> v22 = %f +- %f\n", itrig, iassoc, ib, fit.GetParameter(3), fit.GetParError(3));
+	
+	auto fit = new TF1(fitName,"[0]+[1]*(1 + 2*[2]*TMath::Cos(x) + 2*[3]*TMath::Cos(2*x) + 2*[4]*TMath::Cos(3*x) + 2*[5]*TMath::Cos(4*x) + 2*[6]*TMath::Cos(5*x))");
+	fit->SetParNames("czyam","c","v1","v2","v3","v4","v5");
+
+	// fit->FixParameter(5,0.0); // v4 := 0
+	// fit->FixParameter(6,0.0); // v5 := 0
+	fit->FixParameter(0,0.0); // offset := 0
+
+	// new TCanvas;
+	const char* option = "Q0SE"; //"0QSE";
+	TFitResultPtr r = phf1->Fit(fit,option,"",-TMath::Pi()/2.0,3.0/2.0*TMath::Pi());
+
+	// fit->Print("V");
 
 	if(write){
-		fit.SetRange(-TMath::Pi()/2.0,3.0/2.0*TMath::Pi());
-		fit.Write();
+		fit->SetRange(-TMath::Pi()/2.0,3.0/2.0*TMath::Pi());
+		fit->Write();
 	}
 
-	return {fit.GetParameter(3),fit.GetParError(3)};
+	return fit;
+}
+
+TF1* extractSubtraction(TH1D *phf1, const char *pnamepf, TF1* subtract, bool write = true){
+	const TString fitName = Form("fit%s",pnamepf);
+
+	auto fit = new TF1(fitName,"[0]+[1]*(1 + 2*[2]*TMath::Cos(x)  + 2*[3] *TMath::Cos(2*x) + 2*[4] *TMath::Cos(3*x) + 2*[5] *TMath::Cos(4*x) + 2*[6]*TMath::Cos(5*x)) + "
+		                  "[7]*([8]+[9]*(1 + 2*[10]*TMath::Cos(x) + 2*[11]*TMath::Cos(2*x) + 2*[12]*TMath::Cos(3*x) + 2*[13]*TMath::Cos(4*x) + 2*[14]*TMath::Cos(5*x)))"	
+	);
+	const char* parNames[] = {"czyam","c","v1","v2","v3","v4","v5","scaling",
+					          "czyam_lm","c_lm","v1_lm","v2_lm","v3_lm","v4_lm","v5_lm" };
+	for (int i=0; i<15; i++)
+		fit->SetParName(i, parNames[i]);
+
+	fit->FixParameter(2,0.0); // v1 := 0
+	fit->FixParameter(5,0.0); // v4 := 0
+	fit->FixParameter(6,0.0); // v5 := 0
+	fit->FixParameter(0,0.0); // offset := 0
+
+	fit->SetParameter(7, 1.6);
+	fit->SetParLimits(7, 1.0, 3);
+
+	for (int i=0; i<7; i++)
+		fit->FixParameter(i+8, subtract->GetParameter(i));
+
+	// new TCanvas;
+	TString option = "0SE"; //"0SE";
+	printf("Pass 1 (ignore the warnings):\n");
+	phf1->Fit(fit,option + "Q","",-TMath::Pi()/2.0,3.0/2.0*TMath::Pi());
+	printf("Pass 2 (check the output):\n");
+	TFitResultPtr r = phf1->Fit(fit,option,"",-TMath::Pi()/2.0,3.0/2.0*TMath::Pi());
+
+	// fit->Print("V");
+
+	if(write){
+		fit->SetRange(-TMath::Pi()/2.0,3.0/2.0*TMath::Pi());
+		fit->Write();
+	}
+
+	return fit;
 }
 
 bool kSubtraction = kTRUE;
 
-void fit(const char *pinFileName = "dphi_corr.root", const char *poutFileName = "flow.root", double absDeltaEtaMin = 1.0, double absDeltaEtaMax = 1.5, double absDeltaPhiMax = 1.3){
+void fit(const char *pinFileName = "dphi_corr.root", const char *poutFileName = "flow.root", double absDeltaEtaMin = 1.0, double absDeltaEtaMax = 1.6, double absDeltaPhiMax = 1.3){
 	TFile *pf = new TFile(pinFileName,"read");
 
 	TTree *paxes = (TTree*)pf->Get("axes");
@@ -123,7 +162,10 @@ void fit(const char *pinFileName = "dphi_corr.root", const char *poutFileName = 
 			TGraph grnfNAssoc(Ncent);
 			TGraph grnfYJet(Ncent);
 			double TempSub, TempSubErr;
-			TH2D* lowestHist = nullptr;
+
+			TF1* lowestFit = nullptr;
+			TH1* lowestHist = nullptr;
+
 			for(uint ib = 1; ib < Ncent; ++ib){ // skip lowest
 			// for(int ib = Ncent.q-1; ib >= 0; --ib){ //for centrality, start from highest bin in order to handle the LM template first
 				gpsimMass = (TH1D*)pf->Get(Form("mass_%u_%u",itrig,ib));
@@ -139,15 +181,7 @@ void fit(const char *pinFileName = "dphi_corr.root", const char *poutFileName = 
 						printf("No histograms corresponding mult bin %u. (itrig=%u, iassoc=%u)\n",ib,itrig,iassoc);
 						continue;
 					}
-					if (!lowestHist) {
-						lowestHist = (TH2D*) ph->Clone("lowest");
-					} else
-					{
-						// ph->DrawClone("SURF1");
-						ph->Add(lowestHist, -1); // TODO factor from fit, but may not be needed in OO
-						// new TCanvas; ph->Draw("SURF1");
-						// return;
-					}
+
 					int a = ph->GetYaxis()->FindBin(absDeltaEtaMin);
 					int b = ph->GetYaxis()->FindBin(absDeltaEtaMax);
 					TH1D *pp = ph->ProjectionX(Form("proj_dphi_P%s",namepf.Data()),a,b,"e"); //positive side DeltaPhi long-range
@@ -177,8 +211,34 @@ void fit(const char *pinFileName = "dphi_corr.root", const char *poutFileName = 
 						pjetYieldRaw = (TH1D*)pd->Clone(); //yield needed later for the non-flow subtraction
 					pd->Write();
 
-					auto [v2sb,v2sberr] = extract(phf1,itrig,iassoc,ib,namepf.Data());
-					// return;
+					float v2sb, v2sberr, scaling, scalingerr;
+					
+					if (!lowestFit) {
+						auto fit = extract(phf1, namepf.Data());
+						v2sb = fit->GetParameter(3);
+						v2sberr = fit->GetParError(3);
+						scaling = scalingerr = 0;
+
+						lowestFit = fit;
+						lowestHist = ph;
+					} else {
+						auto fit = extractSubtraction(phf1, namepf.Data(), lowestFit);
+						v2sb = fit->GetParameter(3);
+						v2sberr = fit->GetParError(3);
+						scaling = fit->GetParameter(7);
+						scalingerr = fit->GetParError(7);
+
+						// draw a subtracted 2d histogram with the scale factor (looks horrible in pp, let's see in OO)
+						if (false) {
+							new TCanvas;
+							auto clone = (TH2*) ph->Clone("clone");
+							clone->Add(lowestHist, -1.0 * scaling);
+							clone->Draw("SURF1");
+							return;
+						}
+					}
+					printf("Fitting %d %d %d --> v22 = %.4f +- %.4f | scaling: %.2f +- %.2f\n", itrig, iassoc, ib, v2sb, v2sberr, scaling, scalingerr);
+
 					if(imass >= 0){
 						gpsimMass->GetXaxis()->SetRangeUser(pmassBins[imass],pmassBins[imass+1]);
 						double meanMass = gpsimMass->GetMean();
