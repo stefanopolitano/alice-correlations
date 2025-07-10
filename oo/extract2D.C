@@ -37,14 +37,16 @@ void extract2D(const char *fileNamePbPb = "AnalysisResults.root", const char *ou
   CorrelationContainer::CFStep step = CorrelationContainer::kCFStepReconstructed;
   Bool_t normalizePerTrigger = kTRUE; // don't do this if histograms are to be merged with other periods later -> Use MergeDPhiFiles below
 
-  UInt_t maxLeadingPt = 2;
-  Float_t leadingPtArr[] = {1.0, 2.0, 3.0};
+  // trigger particle pT = leading particle pT
+  UInt_t maxLeadingPt = 3;
+  Float_t leadingPtArr[] = {0.5, 1.0, 2.0, 3.0};
 
-  UInt_t maxAssocPt = 2;
-  Float_t assocPtArr[] = {1.0, 2.0, 3.0};
+  UInt_t maxAssocPt = 3;
+  Float_t assocPtArr[] = {0.5, 1.0, 2.0, 3.0};
 
-  UInt_t maxCentrality = 5;
-  Float_t centralityArr[] = {0,5,10,20,30,40,50,100.1};
+  UInt_t maxCentrality = 7;
+  Float_t centralityArr[] = {0,25,50,75,100,125,150,200}; // pp
+  // Float_t centralityArr[] = {0,5,10,20,30,40,50,100.1}; // pp
 
   Float_t massArr[] = {0, 100};
   UInt_t maxMass = 0; // disables mass axis // TODO case maxMass>0 not yet implemented below

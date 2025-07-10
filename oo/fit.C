@@ -100,7 +100,7 @@ TF1* extractSubtraction(TH1D *phf1, const char *pnamepf, TF1* subtract, bool wri
 
 bool kSubtraction = kTRUE;
 
-void fit(const char *pinFileName = "dphi_corr.root", const char *poutFileName = "flow.root", double absDeltaEtaMin = 1.0, double absDeltaEtaMax = 1.6, double absDeltaPhiMax = 1.3){
+void fit(const char *pinFileName = "dphi_corr.root", const char *poutFileName = "flow.root", double absDeltaEtaMin = 1.2, double absDeltaEtaMax = 1.8, double absDeltaPhiMax = 1.3){
 	TFile *pf = new TFile(pinFileName,"read");
 
 	TTree *paxes = (TTree*)pf->Get("axes");
@@ -156,7 +156,7 @@ void fit(const char *pinFileName = "dphi_corr.root", const char *poutFileName = 
 	pfout->cd();
 
 	for(uint itrig = 0; itrig < Ntrig; ++itrig){
-		for(uint iassoc = itrig; iassoc <= itrig; ++iassoc){
+		for(uint iassoc = 0; iassoc <= itrig; ++iassoc){
 		// for(uint iassoc = 0; iassoc <= 0; ++iassoc){
 			TGraphErrors grv22(Ncent); //v22, no non-flow subtraction
 			TGraphErrors grv22nfsub(Ncent-1); //v22
@@ -167,7 +167,7 @@ void fit(const char *pinFileName = "dphi_corr.root", const char *poutFileName = 
 			TF1* lowestFit = nullptr;
 			TH1* lowestHist = nullptr;
 
-			for(uint ib = 1; ib < Ncent; ++ib){ // skip lowest
+			for(uint ib = 0; ib < Ncent; ++ib){ // skip lowest
 			// for(int ib = Ncent.q-1; ib >= 0; --ib){ //for centrality, start from highest bin in order to handle the LM template first
 				gpsimMass = (TH1D*)pf->Get(Form("mass_%u_%u",itrig,ib));
 
@@ -237,7 +237,7 @@ void fit(const char *pinFileName = "dphi_corr.root", const char *poutFileName = 
 						v2lmsuberr = v2templateerr * factor; // TODO uncertainty propagation of param 1 and 9
 
 						// draw a subtracted 2d histogram with the scale factor (looks horrible in pp, let's see in OO)
-						if (false) {
+						if (false && ib == 4 && itrig == 2 && iassoc == 1) {
 							new TCanvas;
 							auto clone = (TH2*) ph->Clone("clone");
 							clone->Add(lowestHist, -1.0 * scaling);
