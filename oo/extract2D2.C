@@ -47,11 +47,11 @@ std::map<std::string, BinningConfig> getBinningConfigs()
         {1.07, 1.090, 1.100, 1.105, 1.106, 1.107, 1.108, 1.109, 1.110, 1.111, 1.112, 1.113, 1.114, 1.115, 1.116, 1.117, 1.118, 1.119, 1.120, 1.121, 1.122, 1.123, 1.124, 1.125, 1.130, 1.140, 1.160, 1.170},
         "lambda"};
     // Antiambda
-    binmap["Antiambda"] = {
+    binmap["Antilambda"] = {
         {0.8, 1, 1.4, 1.8, 2.2, 2.6, 3, 3.4, 3.8, 4.2, 4.6, 5},
-        {0, 0.5, 5},
+        {0.5, 5},
         {0, 25, 50, 75, 100, 125, 150, 200, 300},
-        {0, 1.07, 1.090, 1.100, 1.105, 1.106, 1.107, 1.108, 1.109, 1.110, 1.111, 1.112, 1.113, 1.114, 1.115, 1.116, 1.117, 1.118, 1.119, 1.120, 1.121, 1.122, 1.123, 1.124, 1.125, 1.130, 1.140, 1.160, 1.170},
+        {1.07, 1.090, 1.100, 1.105, 1.106, 1.107, 1.108, 1.109, 1.110, 1.111, 1.112, 1.113, 1.114, 1.115, 1.116, 1.117, 1.118, 1.119, 1.120, 1.121, 1.122, 1.123, 1.124, 1.125, 1.130, 1.140, 1.160, 1.170},
         "antilambda"};
     // K0s
     binmap["K0s"] = {
@@ -158,9 +158,9 @@ void GetSumOfRatiosUnified(
     str2.Form("%.2f < p_{T,assoc} < %.2f", gpTMin - 0.01, gpTMax + 0.01);
     TString str3;
     if (useMass)
-        str3.Form("%.2f < M < %.2f", massBegin - 0.01, massEnd + 0.01);
+        str3.Form("%.4f < M < %.4f", massBegin - 0.01, massEnd + 0.01);
     else
-        str3.Form("%.2f < M < %.2f", 0.0, 0.0);
+        str3.Form("%.4f < M < %.4f", 0.0, 0.0);
 
     TString newTitle;
     newTitle.Form("%s - %s - %s - %.0f-%.0f", str.Data(), str2.Data(), str3.Data(), centralityBegin, centralityEnd);
@@ -177,7 +177,7 @@ void GetSumOfRatiosUnified(
 }
 
 // Main function - output file is per leading pT bin, user provides particle name
-void extract2D2(const char *fileNamePbPb = "final_AnalysisResults.root", const char *folder = "correlation-task", const char *particleName = "K0s", bool qaplot = false)
+void extract2D2(const char *fileNamePbPb = "final_AnalysisResults.root", const char *outdir = "./k0s_test", const char *folder = "correlation-task", const char *particleName = "K0s", bool qaplot = true)
 {
     using clock = std::chrono::steady_clock;
     auto t0 = clock::now();
@@ -278,7 +278,8 @@ void extract2D2(const char *fileNamePbPb = "final_AnalysisResults.root", const c
         auto tbin_start = clock::now();
 
         TString outFileName;
-        outFileName.Form("dphi_corr_%s_ptleading%d.root", cfg.outPrefix.c_str(), iLeadingPt);
+        outFileName.Form("%s/dphi_corr_%s_ptleading%d.root", outdir, cfg.outPrefix.c_str(), iLeadingPt);
+        gSystem->Exec(Form("mkdir -p %s", outdir)); // Ensure output directory exists
         TFile file(outFileName, "RECREATE");
 
         std::cout << "\n\nStarting leading pT bin " << iLeadingPt << "/" << maxLeadingPt << " for particle " << particle << std::endl;
@@ -290,6 +291,12 @@ void extract2D2(const char *fileNamePbPb = "final_AnalysisResults.root", const c
         UInt_t Nmass = maxMass;
         std::cout << "NleadingPt: " << NleadingPt << ", NassocPt: " << NassocPt
                   << ", Ncentrality: " << Ncentrality << ", Nmass: " << Nmass << std::endl;
+        std::cout << "Mass bins: ";
+        for (int i = 0; i < maxMass + 1; ++i)
+        {
+            std::cout << cfg.massArr[i] << " ";
+        }
+        std::cout << std::endl;
         axes.Branch("NleadingPt", &NleadingPt, "NleadingPt/i");
         axes.Branch("leadingPt", leadingPtArrC, Form("leadingPt[%d]/F", maxLeadingPt + 1));
         axes.Branch("NassocPt", &NassocPt, "NassocPt/i");
@@ -312,12 +319,15 @@ void extract2D2(const char *fileNamePbPb = "final_AnalysisResults.root", const c
 
             for (int mult = 0; mult < maxCentrality; ++mult) // Loop over centrality
             {
-                int nPads = maxMass;
-                int nRows = std::ceil(std::sqrt(nPads));
-                int nCols = std::ceil(double(nPads) / nRows);
                 TCanvas *cMass = new TCanvas(Form("cmass_%d_%d_%d", iLeadingPt, iAssocPt, mult),
                                              "All mass cuts", 1200, 1000);
-                cMass->Divide(nCols, nRows, 0.001, 0.001);
+                if (qaplot)
+                {
+                    int nPads = maxMass;
+                    int nRows = std::ceil(std::sqrt(nPads));
+                    int nCols = std::ceil(double(nPads) / nRows);
+                    cMass->Divide(nCols, nRows, 0.001, 0.001);
+                }
 
                 // Set up the correlation containers
                 auto hcopy = (CorrelationContainer *)inputFile->Get(Form("%s/sameEvent", folder));
@@ -350,7 +360,7 @@ void extract2D2(const char *fileNamePbPb = "final_AnalysisResults.root", const c
                         hMapSame->Draw("SURF1");
                         cMap.cd(2);
                         hMapMixed->Draw("SURF1COLZSAME");
-                        cMap.SaveAs(Form("DeltaEtaDeltaPhiMap_%d_%d.pdf", iLeadingPt, mult));
+                        cMap.SaveAs(Form("%s/deltaEtaDeltaPhiMap_%d_%d.pdf", outdir, iLeadingPt, mult));
                     }
                     if (hmass2)
                     {
@@ -377,7 +387,7 @@ void extract2D2(const char *fileNamePbPb = "final_AnalysisResults.root", const c
                 delete hcopy;
                 delete hMixedcopy;
 
-                for (int mass = 0; mass < maxMass; ++mass)
+                for (int mass = 0; mass < maxMass; ++mass) // Loop over mass bins
                 {
                     auto hcopy2 = (CorrelationContainer *)inputFile->Get(Form("%s/sameEvent", folder));
                     auto hMixedcopy2 = (CorrelationContainer *)inputFile->Get(Form("%s/mixedEvent", folder));
@@ -397,23 +407,28 @@ void extract2D2(const char *fileNamePbPb = "final_AnalysisResults.root", const c
                         hist1->Write();
 
                         // Draw on canvas pad
-                        cMass->cd(mass + 1);
-                        PlotTH2OnPad(hist1, (TPad *)cMass->cd(mass + 1), -1.8, -4.4, -1.4, 1.4, hist1->GetMaximum() * 0.6, hist1->GetMaximum() * 1.01,
-                                     140, 40);
-                        // Save the canvas with all mass plots
-                        TString pdfname = Form("dphi_%s_ptleading%d_assoc%d_cent%d_allmass.pdf",
-                                               cfg.outPrefix.c_str(), iLeadingPt, iAssocPt, mult);
-                        cMass->SaveAs(pdfname);
+                        if (qaplot)
+                        {
+                            cMass->cd(mass + 1);
+                            PlotTH2OnPad(hist1, (TPad *)cMass->cd(mass + 1), -1.8, -4.4, -1.4, 1.4, hist1->GetMaximum() * 0.4, hist1->GetMaximum() * 1.01,
+                                         140, 40);
+                            // Save the canvas with all mass plots
+                            TString pdfname = Form("%s/dphi_%s_ptleading%d_assoc%d_cent%d_allmass.pdf",
+                                                   outdir, cfg.outPrefix.c_str(), iLeadingPt, iAssocPt, mult);
+                            cMass->SaveAs(pdfname);
+                        }
                     }
                     delete hist1;
                     delete hcopy2;
                     delete hMixedcopy2;
                 }
                 file.cd();
-                cMass->SetName(Form("cmass_%d_%d_%d", iLeadingPt, iAssocPt, mult));
-                cMass->Write();
-
-                delete cMass;
+                if (qaplot)
+                {
+                    cMass->SetName(Form("cmass_%d_%d_%d", iLeadingPt, iAssocPt, mult));
+                    cMass->Write();
+                    delete cMass;
+                }
             } // mult
         } // iAssocPt
 
