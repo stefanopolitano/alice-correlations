@@ -81,7 +81,7 @@ void PlotTH2OnPad(
     h->SetLineColor(kBlack);
     h->SetLineStyle(8);
 
-    //Set the grid empty
+    // Set the grid empty
     pad->SetGridx(0);
     pad->SetGridy(0);
 
@@ -116,7 +116,8 @@ void PlotTH2OnPad(
     h->GetYaxis()->SetDecimals();
     h->GetZaxis()->SetDecimals();
 
-    pad->SetTheta(theta);    pad->SetPhi(phi);
+    pad->SetTheta(theta);
+    pad->SetPhi(phi);
 
     h->DrawCopy("SURF1");
 }
@@ -140,7 +141,8 @@ void GetSumOfRatiosUnified(
         hMixed->getPairHist()->getTHn(6)->GetAxis(6)->SetRangeUser(massBegin, massEnd);
         h->getTriggerHist()->getTHn(6)->GetAxis(3)->SetRangeUser(massBegin, massEnd);
         hMixed->getTriggerHist()->getTHn(6)->GetAxis(3)->SetRangeUser(massBegin, massEnd);
-    } else
+    }
+    else
     {
         h->getPairHist()->getTHn(6)->GetAxis(6)->SetRangeUser(0.0, 0.0);
         hMixed->getPairHist()->getTHn(6)->GetAxis(6)->SetRangeUser(0.0, 0.0);
@@ -156,7 +158,7 @@ void GetSumOfRatiosUnified(
     str2.Form("%.2f < p_{T,assoc} < %.2f", gpTMin - 0.01, gpTMax + 0.01);
     TString str3;
     if (useMass)
-        str3.Form("%.2f < M < %.2f", massBegin-0.01, massEnd+0.01);
+        str3.Form("%.2f < M < %.2f", massBegin - 0.01, massEnd + 0.01);
     else
         str3.Form("%.2f < M < %.2f", 0.0, 0.0);
 
@@ -175,7 +177,7 @@ void GetSumOfRatiosUnified(
 }
 
 // Main function - output file is per leading pT bin, user provides particle name
-void extract2D2(const char *fileNamePbPb = "final_AnalysisResults.root", const char *folder = "correlation-task", const char *particleName = "K0s")
+void extract2D2(const char *fileNamePbPb = "final_AnalysisResults.root", const char *folder = "correlation-task", const char *particleName = "K0s", bool qaplot = false)
 {
     using clock = std::chrono::steady_clock;
     auto t0 = clock::now();
@@ -209,15 +211,21 @@ void extract2D2(const char *fileNamePbPb = "final_AnalysisResults.root", const c
 
     // Check the binning configuration
     auto *inputFile = TFile::Open(fileNamePbPb);
+    // Axis 0: axis0 - #Delta#eta
+    // Axis 1 : axis1 - p_{T}(GeV / c)
+    // Axis 2 : axis2 - p_{T}(GeV / c)
+    // Axis 3 : axis3 - multiplicity / centrality
+    // Axis 4 : axis4 - #Delta #varphi(rad)
+    // Axis 5 : axis5 - z - vtx(cm)    // Axis 6 : axis6 - m(GeV / c ^ 2)
     auto h = (CorrelationContainer *)inputFile->Get(Form("%s/sameEvent", folder));
     auto thn = h->getPairHist()->getTHn(6);
     if (!thn)
     {
         std::cerr << "FATAL: THnBase is null!\n";
         return;
-
-    } else
-    {   
+    }
+    else
+    {
         int nAxes = thn->GetNdimensions();
 
         if (thn->GetAxis(2)->GetXmin() > cfg.leadingPtArr[0] || thn->GetAxis(2)->GetXmax() < cfg.leadingPtArr[maxLeadingPt])
@@ -323,6 +331,27 @@ void extract2D2(const char *fileNamePbPb = "final_AnalysisResults.root", const c
                     thnOriginal->GetAxis(3)->SetRangeUser(cfg.centralityArr[mult] + 0.01, cfg.centralityArr[mult + 1] - 0.01);
                     thnOriginal->GetAxis(2)->SetRangeUser(cfg.leadingPtArr[iLeadingPt] + 0.01, cfg.leadingPtArr[iLeadingPt + 1] - 0.01);
                     auto hmass2 = thnOriginal->Projection(6);
+                    if (qaplot)
+                    {
+                        auto hMapSame = thnOriginal->Projection(0, 4);
+                        auto hMapMixed = hMixedcopy->getPairHist()->getTHn(6)->Projection(0, 4);
+                        hMapSame->SetName(Form("hDeltaEtaDeltaPhiMapSameMass_%d_%d", iLeadingPt, mult));
+                        hMapMixed->SetName(Form("hDeltaEtaDeltaPhiMapMixedMass_%d_%d", iLeadingPt, mult));
+                        hMapSame->SetTitle("DeltaEta vs DeltaPhi Map Same Event");
+                        hMapMixed->SetTitle("DeltaEta vs DeltaPhi Map Mixed Event");
+                        hMapSame->SetStats(0);
+                        hMapMixed->SetStats(0);
+                        file.cd();
+                        hMapSame->Write();
+                        hMapMixed->Write();
+                        TCanvas cMap(Form("cMap_%d_%d", iLeadingPt, mult), "DeltaEta vs DeltaPhi Map", 800, 600);
+                        cMap.Divide(2, 1);
+                        cMap.cd(1);
+                        hMapSame->Draw("SURF1");
+                        cMap.cd(2);
+                        hMapMixed->Draw("SURF1COLZSAME");
+                        cMap.SaveAs(Form("DeltaEtaDeltaPhiMap_%d_%d.pdf", iLeadingPt, mult));
+                    }
                     if (hmass2)
                     {
                         file.cd();
@@ -366,7 +395,7 @@ void extract2D2(const char *fileNamePbPb = "final_AnalysisResults.root", const c
                         file.cd();
                         hist1->SetName(Form("dphi_%d_%d_%d_%d", iLeadingPt, iAssocPt, mult, mass));
                         hist1->Write();
-                        
+
                         // Draw on canvas pad
                         cMass->cd(mass + 1);
                         PlotTH2OnPad(hist1, (TPad *)cMass->cd(mass + 1), -1.8, -4.4, -1.4, 1.4, hist1->GetMaximum() * 0.6, hist1->GetMaximum() * 1.01,
