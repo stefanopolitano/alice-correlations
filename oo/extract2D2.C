@@ -60,6 +60,14 @@ std::map<std::string, BinningConfig> getBinningConfigs()
         {0, 20, 40, 80, 100, 200},
         {0.45, 0.46, 0.47, 0.475, 0.48, 0.485, 0.490, 0.495, 0.5, 0.505, 0.51, 0.52, 0.53},
         "k0s"};
+    // phi
+    binmap["Phi"] = {
+        {0.5, 5.0},
+        {0.5, 3},
+        {25, 300},
+        {0.990, 1.000, 1.002, 1.004, 1.006, 1.008, 1.009, 1.010, 1.011, 1.012, 1.013, 1.014, 1.015, 1.016, 1.017, 1.018, 1.019, 1.020, 1.021, 1.022, 1.023, 1.024, 1.025, 1.026, 1.027, 1.028, 1.029,
+         1.031, 1.033, 1.035, 1.037, 1.039, 1.040, 1.050, 1.060, 1.07},
+        "phi"};
     return binmap;
 }
 
@@ -177,7 +185,7 @@ void GetSumOfRatiosUnified(
 }
 
 // Main function - output file is per leading pT bin, user provides particle name
-void extract2D2(const char *fileNamePbPb = "final_AnalysisResults.root", const char *outdir = "./k0s_test", const char *folder = "correlation-task", const char *particleName = "K0s", bool qaplot = true)
+void extract2D2(const char *fileNamePbPb = "AnalysisResults_test.root", const char *outdir = "./phi_test2", const char *folder = "correlation-task_phi", const char *particleName = "Phi", bool qaplot = true)
 {
     using clock = std::chrono::steady_clock;
     auto t0 = clock::now();
@@ -340,11 +348,18 @@ void extract2D2(const char *fileNamePbPb = "final_AnalysisResults.root", const c
                     auto thnOriginal = hcopy->getPairHist()->getTHn(6);
                     thnOriginal->GetAxis(3)->SetRangeUser(cfg.centralityArr[mult] + 0.01, cfg.centralityArr[mult + 1] - 0.01);
                     thnOriginal->GetAxis(2)->SetRangeUser(cfg.leadingPtArr[iLeadingPt] + 0.01, cfg.leadingPtArr[iLeadingPt + 1] - 0.01);
+                    auto hMixedcopy2 = hMixedcopy->getPairHist()->getTHn(6);
+                    hMixedcopy2->GetAxis(3)->SetRangeUser(cfg.centralityArr[mult] + 0.01, cfg.centralityArr[mult + 1] - 0.01);
+                    hMixedcopy2->GetAxis(2)->SetRangeUser(cfg.leadingPtArr[iLeadingPt] + 0.01, cfg.leadingPtArr[iLeadingPt + 1] - 0.01);
                     auto hmass2 = thnOriginal->Projection(6);
+                    auto hMixedMass = hMixedcopy2->Projection(6);
                     if (qaplot)
                     {
                         auto hMapSame = thnOriginal->Projection(0, 4);
-                        auto hMapMixed = hMixedcopy->getPairHist()->getTHn(6)->Projection(0, 4);
+                        auto thnMixed = hMixedcopy->getPairHist()->getTHn(6);
+                        thnMixed->GetAxis(3)->SetRangeUser(cfg.centralityArr[mult] + 0.01, cfg.centralityArr[mult + 1] - 0.01);
+                        thnMixed->GetAxis(2)->SetRangeUser(cfg.leadingPtArr[iLeadingPt] + 0.01, cfg.leadingPtArr[iLeadingPt + 1] - 0.01);
+                        auto hMapMixed = thnMixed->Projection(0, 4);
                         hMapSame->SetName(Form("hDeltaEtaDeltaPhiMapSameMass_%d_%d", iLeadingPt, mult));
                         hMapMixed->SetName(Form("hDeltaEtaDeltaPhiMapMixedMass_%d_%d", iLeadingPt, mult));
                         hMapSame->SetTitle("DeltaEta vs DeltaPhi Map Same Event");
@@ -359,7 +374,7 @@ void extract2D2(const char *fileNamePbPb = "final_AnalysisResults.root", const c
                         cMap.cd(1);
                         hMapSame->Draw("SURF1");
                         cMap.cd(2);
-                        hMapMixed->Draw("SURF1COLZSAME");
+                        hMapMixed->Draw("SURF1SAME");
                         cMap.SaveAs(Form("%s/deltaEtaDeltaPhiMap_%d_%d.pdf", outdir, iLeadingPt, mult));
                     }
                     if (hmass2)
@@ -367,6 +382,12 @@ void extract2D2(const char *fileNamePbPb = "final_AnalysisResults.root", const c
                         file.cd();
                         hmass2->SetName(Form("hmass_%d_%d", iLeadingPt, mult));
                         hmass2->Write();
+                    }
+                    if (hMixedMass)
+                    {
+                        file.cd();
+                        hMixedMass->SetName(Form("hmassMixed_%d_%d", iLeadingPt, mult));
+                        hMixedMass->Write();
                     }
                 }
 
