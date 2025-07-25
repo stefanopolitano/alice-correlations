@@ -41,33 +41,41 @@ std::map<std::string, BinningConfig> getBinningConfigs()
 
     // Lambda
     binmap["Lambda"] = {
-        {0.8, 1, 1.4, 1.8, 2.2, 2.6, 3, 3.4, 3.8, 4.2, 4.6, 3},
+        {0.5, 1.0, 1.5, 2.5, 3.5, 5},
         {0.5, 5},
-        {0, 25, 50, 75, 100, 125, 150, 200, 300},
-        {1.07, 1.090, 1.100, 1.105, 1.106, 1.107, 1.108, 1.109, 1.110, 1.111, 1.112, 1.113, 1.114, 1.115, 1.116, 1.117, 1.118, 1.119, 1.120, 1.121, 1.122, 1.123, 1.124, 1.125, 1.130, 1.140, 1.160, 1.170},
+        {0, 50, 100, 300},
+        {1.07, 1.076, 1.082, 1.09, 1.1, 1.102, 1.104, 1.106, 1.108, 1.11, 1.112, 1.114, 1.116, 1.118, 1.12, 1.122, 1.124, 1.126, 1.13, 1.136, 1.142, 1.15, 1.156, 1.17},
         "lambda"};
     // Antiambda
     binmap["Antilambda"] = {
-        {0.8, 1, 1.4, 1.8, 2.2, 2.6, 3, 3.4, 3.8, 4.2, 4.6, 5},
+        {0.5, 1.0, 1.5, 2.5, 3.5, 5},
         {0.5, 5},
-        {0, 25, 50, 75, 100, 125, 150, 200, 300},
-        {1.07, 1.090, 1.100, 1.105, 1.106, 1.107, 1.108, 1.109, 1.110, 1.111, 1.112, 1.113, 1.114, 1.115, 1.116, 1.117, 1.118, 1.119, 1.120, 1.121, 1.122, 1.123, 1.124, 1.125, 1.130, 1.140, 1.160, 1.170},
+        {0, 50, 100, 300},
+        {1.07, 1.076, 1.082, 1.09, 1.1, 1.102, 1.104, 1.106, 1.108, 1.11, 1.112, 1.114, 1.116, 1.118, 1.12, 1.122, 1.124, 1.126, 1.13, 1.136, 1.142, 1.15, 1.156, 1.17},
         "antilambda"};
     // K0s
     binmap["K0s"] = {
-        {0.6, 0.8, 1, 1.2, 1.5, 2.0, 3.0},
-        {0.5, 3},
-        {0, 20, 40, 80, 100, 200},
-        {0.45, 0.46, 0.47, 0.475, 0.48, 0.485, 0.490, 0.495, 0.5, 0.505, 0.51, 0.52, 0.53},
+        {0.5, 1.0, 1.5, 2.5, 3.5, 5},
+        {0.5, 5},
+        {0, 50, 100, 300},
+        {0.45, 0.452, 0.454, 0.456, 0.458, 0.46, 0.462, 0.464, 0.466, 0.468, 0.47, 0.472, 0.474, 0.476, 0.478, 0.48, 0.482, 0.484, 0.486, 0.488, 0.49, 0.492, 0.494, 0.496, 0.498, 0.5, 0.502, 0.504, 0.506, 0.508, 0.51, 0.512, 0.514, 0.516, 0.518, 0.52, 0.522, 0.524, 0.526, 0.528, 0.53, 0.532, 0.534, 0.536, 0.538, 0.54, 0.542, 0.544, 0.546, 0.548, 0.55},
         "k0s"};
     // phi
     binmap["Phi"] = {
-        {0.5, 5.0},
-        {0.5, 3},
-        {25, 300},
-        {0.990, 1.000, 1.002, 1.004, 1.006, 1.008, 1.009, 1.010, 1.011, 1.012, 1.013, 1.014, 1.015, 1.016, 1.017, 1.018, 1.019, 1.020, 1.021, 1.022, 1.023, 1.024, 1.025, 1.026, 1.027, 1.028, 1.029,
+        {0.8, 2.0, 3.2, 5},
+        {0.5, 5},
+        {0, 50, 100, 300},
+        {0.980, 0.990, 1.000, 1.002, 1.004, 1.006, 1.008, 1.009, 1.010, 1.011, 1.012, 1.013, 1.014, 1.015, 1.016, 1.017, 1.018, 1.019, 1.020, 1.021, 1.022, 1.023, 1.024, 1.025, 1.026, 1.027, 1.028, 1.029,
          1.031, 1.033, 1.035, 1.037, 1.039, 1.040, 1.050, 1.060, 1.07},
         "phi"};
+
+    binmap["Hadrons"] = {
+        {0.5, 5.0},
+        {0.5, 5.0},
+        {0, 50, 100, 200, 300},
+        {0.990, 1.000, 1.002, 1.004, 1.006, 1.008, 1.009, 1.010, 1.011, 1.012, 1.013, 1.014, 1.015, 1.016, 1.017, 1.018, 1.019, 1.020, 1.021, 1.022, 1.023, 1.024, 1.025, 1.026, 1.027, 1.028, 1.029,
+         1.031, 1.033, 1.035, 1.037, 1.039, 1.040, 1.050, 1.060, 1.07},
+        "hadrons"};
     return binmap;
 }
 
@@ -185,7 +193,7 @@ void GetSumOfRatiosUnified(
 }
 
 // Main function - output file is per leading pT bin, user provides particle name
-void extract2D2(const char *fileNamePbPb = "AnalysisResults_test.root", const char *outdir = "./phi_test2", const char *folder = "correlation-task_phi", const char *particleName = "Phi", bool qaplot = true)
+void extract2D2(const char *fileNamePbPb = "/Users/spolitan/cernbox/flowOO/input/oo/AnalysisResults_456563.root", const char *outdir = "./phi_small_final_update", const char *folder = "correlation-task_phi_id33233", const char *particleName = "Phi", bool qaplot = false)
 {
     using clock = std::chrono::steady_clock;
     auto t0 = clock::now();
@@ -260,6 +268,36 @@ void extract2D2(const char *fileNamePbPb = "AnalysisResults_test.root", const ch
                       << "] is outside the configured mass range [" << cfg.massArr[0] << ", "
                       << cfg.massArr[maxMass] << "]\n";
         }
+
+        /*
+        if (qaplot) {
+            TFile outfileQa("qa_output_lambda_wcut_pt.root", "RECREATE");
+            auto hMapSame = thn->Projection(0, 4);
+            auto hMapMixed = thnMixed->Projection(0, 4);
+            hMapSame->Write("same_deltaEtaDeltaPhi");
+            hMapMixed->Write("mixed_deltaEtaDeltaPhi");
+            
+            thn->GetAxis(1)->SetRangeUser(0., 1.0);
+            thnMixed->GetAxis(1)->SetRangeUser(0, 1.0);
+            thn->GetAxis(2)->SetRangeUser(0., 1.0);
+            thnMixed->GetAxis(2)->SetRangeUser(0, 1.0);
+            thn->GetAxis(3)->SetRangeUser(0, 50);
+            thnMixed->GetAxis(3)->SetRangeUser(0, 50);
+            for (int i = 0; i < nAxes; ++i)
+            {
+                auto hAx = thn->Projection(i);
+                hAx->SetLineColor(kBlue);
+                hAx->Write(Form("same_axis%d", i));
+                auto hAxMixed = thnMixed->Projection(i);
+                hAxMixed->SetLineColor(kRed);
+                hAxMixed->Write(Form("mixed_axis%d", i));
+            }
+            
+            
+            outfileQa.Close();
+            return;
+        }
+        */
     }
 
     gStyle->SetOptStat(1111111);
@@ -392,19 +430,21 @@ void extract2D2(const char *fileNamePbPb = "AnalysisResults_test.root", const ch
                 }
 
                 // Get the sum of ratios for the current assoc pT and centrality
+                /*
                 TH1 *hist0 = 0;
                 GetSumOfRatiosUnified(
                     hcopy, hMixedcopy, &hist0, step,
                     cfg.centralityArr[mult] + 0.01, cfg.centralityArr[mult + 1] - 0.01,
                     cfg.leadingPtArr[iLeadingPt] + 0.01, cfg.leadingPtArr[iLeadingPt + 1] - 0.01,
                     normalizePerTrigger, kFALSE);
-                if (hist0)
-                {
-                    file.cd();
-                    hist0->SetName(Form("dphi_%d_%d_%d", iLeadingPt, iAssocPt, mult));
-                    hist0->Write();
-                }
-                delete hist0;
+                    if (hist0)
+                    {
+                        file.cd();
+                        hist0->SetName(Form("dphi_%d_%d_%d", iLeadingPt, iAssocPt, mult));
+                        hist0->Write();
+                    }
+                    delete hist0;
+                */
                 delete hcopy;
                 delete hMixedcopy;
 
