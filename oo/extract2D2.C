@@ -11,8 +11,8 @@
 #include <vector>
 #include <map>
 
-Float_t gpTMin = 0.51;
-Float_t gpTMax = 49.99;
+Float_t gpTMin = 0.5;
+Float_t gpTMax = 8;
 Float_t gZVtxRange = -7;
 
 gStyle->SetPalette(kRainBow);
@@ -35,46 +35,46 @@ struct BinningConfig
     std::string outPrefix;
 };
 
-std::map<std::string, BinningConfig> getBinningConfigs()
+std::map<std::string, BinningConfig>
+getBinningConfigs()
 {
     std::map<std::string, BinningConfig> binmap;
 
     // Lambda
     binmap["Lambda"] = {
-        {0.5, 1.0, 1.5, 2.5, 3.5, 5},
+        {0.5, 0.8, 1.2, 1.6, 2, 2.5, 3, 4, 5, 8},
         {0.5, 5},
-        {0, 50, 100, 300},
-        {1.07, 1.076, 1.082, 1.09, 1.1, 1.102, 1.104, 1.106, 1.108, 1.11, 1.112, 1.114, 1.116, 1.118, 1.12, 1.122, 1.124, 1.126, 1.13, 1.136, 1.142, 1.15, 1.156, 1.17},
+        {0, 10, 20}, // 50, 150, 300},
+        {1.1, 1.102, 1.104, 1.106, 1.108, 1.11, 1.112, 1.114, 1.116, 1.118, 1.12, 1.122, 1.124, 1.126, 1.13},
         "lambda"};
     // Antiambda
     binmap["Antilambda"] = {
-        {0.5, 1.0, 1.5, 2.5, 3.5, 5},
+        {0.5, 0.8, 1.2, 1.6, 2, 2.5, 3, 4, 5, 8},
         {0.5, 5},
-        {0, 50, 100, 300},
-        {1.07, 1.076, 1.082, 1.09, 1.1, 1.102, 1.104, 1.106, 1.108, 1.11, 1.112, 1.114, 1.116, 1.118, 1.12, 1.122, 1.124, 1.126, 1.13, 1.136, 1.142, 1.15, 1.156, 1.17},
+        {0, 25, 50, 150, 300},
+        {1.1, 1.102, 1.104, 1.106, 1.108, 1.11, 1.112, 1.114, 1.116, 1.118, 1.12, 1.122, 1.124, 1.126, 1.13},
         "antilambda"};
     // K0s
     binmap["K0s"] = {
-        {0.5, 1.0, 1.5, 2.5, 3.5, 5},
-        {0.5, 5},
-        {0, 50, 100, 300},
-        {0.45, 0.452, 0.454, 0.456, 0.458, 0.46, 0.462, 0.464, 0.466, 0.468, 0.47, 0.472, 0.474, 0.476, 0.478, 0.48, 0.482, 0.484, 0.486, 0.488, 0.49, 0.492, 0.494, 0.496, 0.498, 0.5, 0.502, 0.504, 0.506, 0.508, 0.51, 0.512, 0.514, 0.516, 0.518, 0.52, 0.522, 0.524, 0.526, 0.528, 0.53, 0.532, 0.534, 0.536, 0.538, 0.54, 0.542, 0.544, 0.546, 0.548, 0.55},
+        {0.5, 0.8, 1.2, 1.6, 2, 2.5, 3, 4, 5, 8},
+        {0.5, 8},
+        //{25, 50, 150, 30}, // nch
+        {0, 10, 20}, // v0m
+        {0.466, 0.47, 0.474, 0.478, 0.482, 0.486, 0.488, 0.49, 0.492, 0.494, 0.496, 0.498, 0.5, 0.502, 0.504, 0.506, 0.51, 0.514, 0.518, 0.524},
         "k0s"};
     // phi
     binmap["Phi"] = {
-        {0.8, 2.0, 3.2, 5},
-        {0.5, 5},
-        {0, 50, 100, 300},
-        {0.980, 0.990, 1.000, 1.002, 1.004, 1.006, 1.008, 1.009, 1.010, 1.011, 1.012, 1.013, 1.014, 1.015, 1.016, 1.017, 1.018, 1.019, 1.020, 1.021, 1.022, 1.023, 1.024, 1.025, 1.026, 1.027, 1.028, 1.029,
-         1.031, 1.033, 1.035, 1.037, 1.039, 1.040, 1.050, 1.060, 1.07},
+        {0.5, 0.8, 1.2, 1.6, 2, 2.5, 3, 4, 5, 8},
+        {0.5, 8},
+        {70, 90},
+        {0.996, 1.01, 1.02, 1.03, 1.04, 1.05, 1.06},
         "phi"};
 
     binmap["Hadrons"] = {
-        {0.5, 5.0},
-        {0.5, 5.0},
-        {0, 50, 100, 200, 300},
-        {0.990, 1.000, 1.002, 1.004, 1.006, 1.008, 1.009, 1.010, 1.011, 1.012, 1.013, 1.014, 1.015, 1.016, 1.017, 1.018, 1.019, 1.020, 1.021, 1.022, 1.023, 1.024, 1.025, 1.026, 1.027, 1.028, 1.029,
-         1.031, 1.033, 1.035, 1.037, 1.039, 1.040, 1.050, 1.060, 1.07},
+        {0.5, 8.0},
+        {0.5, 8.0},
+        {0, 25}, // 50, 150, 300},
+        {1.07, 1.072, 1.074, 1.076, 1.078, 1.08, 1.082, 1.084, 1.086, 1.088, 1.09, 1.092, 1.094, 1.096, 1.098, 1.1, 1.102, 1.104, 1.106, 1.108, 1.11, 1.112, 1.114, 1.116, 1.118, 1.12, 1.122, 1.124, 1.126, 1.128, 1.13, 1.132, 1.134, 1.136, 1.138, 1.14, 1.142, 1.144, 1.146, 1.148, 1.15, 1.152, 1.154, 1.156, 1.158, 1.16, 1.162, 1.164, 1.166, 1.168, 1.17},
         "hadrons"};
     return binmap;
 }
@@ -174,7 +174,7 @@ void GetSumOfRatiosUnified(
     str2.Form("%.2f < p_{T,assoc} < %.2f", gpTMin - 0.01, gpTMax + 0.01);
     TString str3;
     if (useMass)
-        str3.Form("%.4f < M < %.4f", massBegin - 0.01, massEnd + 0.01);
+        str3.Form("%.4f < M < %.4f", massBegin, massEnd);
     else
         str3.Form("%.4f < M < %.4f", 0.0, 0.0);
 
@@ -193,7 +193,7 @@ void GetSumOfRatiosUnified(
 }
 
 // Main function - output file is per leading pT bin, user provides particle name
-void extract2D2(const char *fileNamePbPb = "/Users/spolitan/cernbox/flowOO/input/oo/AnalysisResults_456563.root", const char *outdir = "./phi_small_final_update", const char *folder = "correlation-task_phi_id33233", const char *particleName = "Phi", bool qaplot = false)
+void extract2D2(const char *fileNamePbPb = "/Users/spolitan/cernbox/AnalysisResults_full_pass2_525561_lambda_ft0m.root", const char *outdir = "./lambda_hm_ft0m", const char *folder = "correlation-task", const char *particleName = "Lambda", bool qaplot = false)
 {
     using clock = std::chrono::steady_clock;
     auto t0 = clock::now();
@@ -269,35 +269,35 @@ void extract2D2(const char *fileNamePbPb = "/Users/spolitan/cernbox/flowOO/input
                       << cfg.massArr[maxMass] << "]\n";
         }
 
-        /*
-        if (qaplot) {
-            TFile outfileQa("qa_output_lambda_wcut_pt.root", "RECREATE");
+        ///*
+        if (qaplot)
+        {
+            TFile outfileQa("qa_k0_check.root", "RECREATE");
             auto hMapSame = thn->Projection(0, 4);
-            auto hMapMixed = thnMixed->Projection(0, 4);
+            // auto hMapMixed = thnMixed->Projection(0, 4);
             hMapSame->Write("same_deltaEtaDeltaPhi");
-            hMapMixed->Write("mixed_deltaEtaDeltaPhi");
-            
+            // hMapMixed->Write("mixed_deltaEtaDeltaPhi");
+
             thn->GetAxis(1)->SetRangeUser(0., 1.0);
-            thnMixed->GetAxis(1)->SetRangeUser(0, 1.0);
             thn->GetAxis(2)->SetRangeUser(0., 1.0);
-            thnMixed->GetAxis(2)->SetRangeUser(0, 1.0);
-            thn->GetAxis(3)->SetRangeUser(0, 50);
-            thnMixed->GetAxis(3)->SetRangeUser(0, 50);
+            thn->GetAxis(3)->SetRangeUser(0, 100);
+            // thnMixed->GetAxis(1)->SetRangeUser(0, 1.0);
+            // thnMixed->GetAxis(2)->SetRangeUser(0, 1.0);
+            // thnMixed->GetAxis(3)->SetRangeUser(0, 50);
             for (int i = 0; i < nAxes; ++i)
             {
                 auto hAx = thn->Projection(i);
                 hAx->SetLineColor(kBlue);
                 hAx->Write(Form("same_axis%d", i));
-                auto hAxMixed = thnMixed->Projection(i);
-                hAxMixed->SetLineColor(kRed);
-                hAxMixed->Write(Form("mixed_axis%d", i));
+                // auto hAxMixed = thnMixed->Projection(i);
+                // hAxMixed->SetLineColor(kRed);
+                // hAxMixed->Write(Form("mixed_axis%d", i));
             }
-            
-            
+
             outfileQa.Close();
             return;
         }
-        */
+        // */
     }
 
     gStyle->SetOptStat(1111111);
@@ -328,7 +328,7 @@ void extract2D2(const char *fileNamePbPb = "/Users/spolitan/cernbox/flowOO/input
         gSystem->Exec(Form("mkdir -p %s", outdir)); // Ensure output directory exists
         TFile file(outFileName, "RECREATE");
 
-        std::cout << "\n\nStarting leading pT bin " << iLeadingPt << "/" << maxLeadingPt << " for particle " << particle << std::endl;
+        std::cout << "\n\n\n####################### Starting leading pT bin " << iLeadingPt << "/" << maxLeadingPt << " for particle " << particle << " #######################\n";
 
         TTree axes("axes", "Axes final binning");
         UInt_t NleadingPt = maxLeadingPt;

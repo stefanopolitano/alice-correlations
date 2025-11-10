@@ -206,8 +206,8 @@ void fit(const char *pinFileName = "infile.root",
     paxes->SetBranchAddress("leadingPt", ptrigPt);
     paxes->GetEntry(0);
 
-    Double_t pmassBins[21] = {1.09, 1.1, 1.102, 1.104, 1.106, 1.108, 1.11, 1.112, 1.114, 1.116, 1.118, 1.12, 1.122, 1.124, 1.126, 1.13, 1.136, 1.142, 1.15, 1.156, 1.16};
-    Nmass = 20;
+    Double_t pmassBins[] = {0.47, 0.474, 0.478, 0.48, 0.484, 0.486, 0.488, 0.49, 0.492, 0.494, 0.496, 0.498, 0.5, 0.502, 0.504, 0.506, 0.508, 0.512, 0.516, 0.520};
+    Nmass = sizeof(pmassBins) / sizeof(pmassBins[0]) - 1;
 
     auto absDeltaEtaMinOrig = absDeltaEtaMin;
     auto absDeltaEtaMaxOrig = absDeltaEtaMax;
@@ -381,7 +381,7 @@ void fit(const char *pinFileName = "infile.root",
 
         std::cout << "Writing v2 vs mass histograms to output file." << std::endl;
         // const int Nbins = Nmass + 1; // number of bins in the mass histogram
-        const int Nbins = 20; // number of bins in the mass histogram
+        const int Nbins = Nmass; // number of bins in the mass histogram
 
         auto hV2Mass = new TH1D(Form("hV2_vs_mass_cent%d_pt%d", imult, itrig),
                                 Form("v2 vs mass (centrality %d and pt %d)", imult, itrig),
@@ -418,7 +418,7 @@ void fit(const char *pinFileName = "infile.root",
     delete pf;
 }
 
-void fitwithsub(bool subtraction = true, const char *inFilePath = "./lambdas_full", const char *outFileName = "./massandv2lambda", double absDeltaEtaMin = 1.2, double absDeltaEtaMax = 1.8, double absDeltaPhiMax = 1.3)
+void fitwithsub(bool subtraction = true, const char *inFilePath = "oo/k0s_full_pass2_011025", const char *outFileName = "oo/k0s_full_pass2_011025/out_fitstd", const char *particleName = "K0s", double absDeltaEtaMin = 1.2, double absDeltaEtaMax = 1.8, double absDeltaPhiMax = 1.3)
 {
     std::cout << "Starting fitwithsub with input file path: " << inFilePath << std::endl;
 
